@@ -7,59 +7,59 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt-stdlib"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #2c3e50;
+            background-color: #ff0000;
             color: white;
             text-align: center;
-            font-family: 'Roboto', sans-serif;
+            font-family: Arial, sans-serif;
             overflow: hidden;
             margin: 0;
-            padding: 0;
         }
         #challenge-box {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: #ecf0f1;
-            color: #2c3e50;
-            padding: 20px;
+            background: white;
+            color: black;
+            padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: none;
-            width: 350px;
+            width: 400px;
             text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         textarea {
             width: 100%;
             height: 80px;
-            padding: 10px;
-            border: 1px solid #bdc3c7;
+            font-family: monospace;
+            padding: 5px;
+            border: 1px solid #ccc;
             border-radius: 5px;
             resize: none;
-            font-family: 'Roboto', sans-serif;
         }
         button {
-            background-color: #e74c3c;
+            background-color: red;
             color: white;
-            padding: 10px 15px;
+            padding: 10px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            font-family: 'Roboto', sans-serif;
-            transition: background-color 0.3s ease;
+            margin-top: 5px;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
         }
         button:hover {
-            background-color: #c0392b;
+            background-color: darkred;
         }
         #output {
-            margin-top: 10px;
-            color: #27ae60;
+            font-weight: bold;
+            color: green;
         }
         #timer {
             font-weight: bold;
+            color: red;
         }
     </style>
 </head>
@@ -84,29 +84,25 @@
             scene: { preload, create, update }
         };
 
-        let player, cursors, platforms, coins, enemies, powerups;
+        let player, cursors, platforms;
         let score = 0;
         let scoreText;
         let isAnswering = false;
         let timer;
-        let timerCountdown = 10;
-
-        const challenges = [
+        let timerCountdown = 20;
+        let challenges = [
             { question: "Print 'Hello, World!'", solution: "print('Hello, World!')" },
             { question: "Define a function that returns the sum of two numbers.", solution: "def add(a, b): return a + b" },
             { question: "Create a loop that prints numbers 1 to 5.", solution: "for i in range(1,6): print(i)" }
         ];
 
+        let currentChallengeIndex = 0;
         const game = new Phaser.Game(config);
 
         function preload() {
-            this.load.image("background", "https://th.bing.com/th/id/R.ad9e62546de9ff1192e8bdfa5a9628d3?rik=tTkFjdNCOHVBeA&riu=http%3A%2F%2Fgetwallpapers.com%2Fwallpaper%2Ffull%2Fa%2F9%2F8%2F585854.jpg&ehk=0xdpNsz4QsxKl0si2GpYxsOCd2%2BQLDdqja0RxhgSEfI%3D&risl=&pid=ImgRaw&r=0");
-            this.load.image("ground", "https://art.pixilart.com/dbfd5eac323fa89.gif");
-            this.load.image("player", "https://art.pixilart.com/9ce054802827aa4.png");
-            this.load.image("coin", "https://dinopixel.com/preload/1222/Coin.png");
-            this.load.image("enemy", "https://art.pixilart.com/77eba5de29.png");
-            this.load.image("powerup", "https://e1.pngegg.com/pngimages/179/167/png-clipart-super-mario-icons-folder-flower-super-mario-powerup-thumbnail.png");
-            this.load.audio("jump", "https://www.fesliyanstudios.com/play-mp3/387");
+            this.load.image("background", "URL_FOR_BACKGROUND");
+            this.load.image("ground", "URL_FOR_GROUND");
+            this.load.image("player", "URL_FOR_PLAYER");
         }
 
         function create() {
@@ -121,36 +117,6 @@
 
             this.physics.add.collider(player, platforms);
             cursors = this.input.keyboard.createCursorKeys();
-
-            coins = this.physics.add.group({
-                key: "coin",
-                repeat: 5,
-                setXY: { x: 200, y: 0, stepX: 120 }
-            });
-
-            coins.children.iterate((coin) => {
-                coin.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-            });
-
-            enemies = this.physics.add.group();
-            let enemy = enemies.create(600, 520, "enemy");
-            enemy.setBounce(1);
-            enemy.setVelocityX(100);
-            enemy.setCollideWorldBounds(true);
-
-            powerups = this.physics.add.group({
-                key: "powerup",
-                repeat: 1,
-                setXY: { x: 500, y: 0 }
-            });
-
-            this.physics.add.collider(coins, platforms);
-            this.physics.add.collider(enemies, platforms);
-            this.physics.add.collider(powerups, platforms);
-            this.physics.add.overlap(player, coins, collectCoin, null, this);
-            this.physics.add.collider(player, enemies, hitEnemy, null, this);
-            this.physics.add.overlap(player, powerups, collectPowerup, null, this);
-
             scoreText = this.add.text(16, 16, "Score: 0", { fontSize: "24px", fill: "#fff" });
 
             showChallenge();
@@ -171,46 +137,60 @@
             }
         }
 
-        function collectCoin(player, coin) {
-            coin.disableBody(true, true);
-            score += 10;
-            scoreText.setText("Score: " + score);
-        }
-
-        function collectPowerup(player, powerup) {
-            powerup.disableBody(true, true);
-            player.setVelocityX(200);
-            setTimeout(() => {
-                player.setVelocityX(160);
-            }, 5000);
-        }
-
-        function hitEnemy(player, enemy) {
-            showChallenge();
-        }
-
         function showChallenge() {
             isAnswering = true;
             document.getElementById("challenge-box").style.display = "block";
-            document.getElementById("challenge-text").innerText = "Solve: " + challenges[Math.floor(Math.random() * challenges.length)].question;
-            timerCountdown = 10;
+            document.getElementById("challenge-text").innerText = "Solve: " + challenges[currentChallengeIndex].question;
+            document.getElementById("codeInput").value = ""; 
+            document.getElementById("output").innerText = "";
+            timerCountdown = 20;
+            document.getElementById("timer").innerText = "Time left: " + timerCountdown + "s";
+
+            if (timer) clearInterval(timer);
             timer = setInterval(updateTimer, 1000);
         }
 
         function updateTimer() {
-            document.getElementById("timer").innerText = "Time left: " + timerCountdown + "s";
             timerCountdown--;
-
+            document.getElementById("timer").innerText = "Time left: " + timerCountdown + "s";
             if (timerCountdown < 0) {
                 clearInterval(timer);
-                alert("Time's up!");
+                alert("Time's up! Try again.");
                 document.getElementById("challenge-box").style.display = "none";
                 isAnswering = false;
             }
         }
 
         function checkAnswer() {
-            let code = document.getElementById("codeInput").value;
+            let code = document.getElementById("codeInput").value.trim();
+            let expectedSolution = challenges[currentChallengeIndex].solution.trim();
+
             Sk.configure({ output: (text) => document.getElementById("output").innerText = text });
 
-            Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code,
+            try {
+                Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
+                    .then(() => {
+                        if (code === expectedSolution) {
+                            document.getElementById("output").innerText = "Correct!";
+                            document.getElementById("output").style.color = "green";
+                            clearInterval(timer);
+                            document.getElementById("challenge-box").style.display = "none";
+                            isAnswering = false;
+                            currentChallengeIndex = (currentChallengeIndex + 1) % challenges.length;
+                        } else {
+                            document.getElementById("output").innerText = "Incorrect, try again!";
+                            document.getElementById("output").style.color = "red";
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById("output").innerText = "Error in code!";
+                        document.getElementById("output").style.color = "red";
+                    });
+            } catch (error) {
+                document.getElementById("output").innerText = "Syntax Error!";
+                document.getElementById("output").style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
