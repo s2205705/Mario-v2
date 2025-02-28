@@ -1,3 +1,14 @@
+Absolutely! Let's give your interface a makeover to make it more user-friendly and visually appealing. Here are some enhancements:
+
+1. **Modern Fonts**: Use Google Fonts for better typography.
+2. **Improved Color Scheme**: Use a more modern color palette.
+3. **Responsive Design**: Make sure it looks good on all devices.
+4. **Better Button Styles**: Use CSS to style buttons.
+5. **Cleaner Layout**: Improve the overall layout for better user experience.
+
+Here's your improved code:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,24 +18,27 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt-stdlib"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #ff0000;
+            background-color: #2c3e50;
             color: white;
             text-align: center;
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             overflow: hidden;
             margin: 0;
+            padding: 0;
         }
         #challenge-box {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: white;
-            color: black;
-            padding: 15px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: none;
             width: 350px;
             text-align: left;
@@ -32,14 +46,31 @@
         textarea {
             width: 100%;
             height: 80px;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            resize: none;
+            font-family: 'Roboto', sans-serif;
         }
         button {
-            background-color: red;
+            background-color: #e74c3c;
             color: white;
-            padding: 8px;
+            padding: 10px 15px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 5px;
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        #output {
+            margin-top: 10px;
+            color: #27ae60;
+        }
+        #timer {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -67,13 +98,11 @@
         let player, cursors, platforms, coins, enemies, powerups;
         let score = 0;
         let scoreText;
-        let level = 1;
-        let currentChallengeIndex = 0;
         let isAnswering = false;
         let timer;
         let timerCountdown = 10;
 
-        let challenges = [
+        const challenges = [
             { question: "Print 'Hello, World!'", solution: "print('Hello, World!')" },
             { question: "Define a function that returns the sum of two numbers.", solution: "def add(a, b): return a + b" },
             { question: "Create a loop that prints numbers 1 to 5.", solution: "for i in range(1,6): print(i)" }
@@ -93,17 +122,17 @@
 
         function create() {
             this.add.image(400, 300, "background").setScale(1.5);
-            
+
             platforms = this.physics.add.staticGroup();
             platforms.create(400, 580, "ground").setScale(2).refreshBody();
 
             player = this.physics.add.sprite(100, 450, "player");
             player.setBounce(0.2);
             player.setCollideWorldBounds(true);
-            
+
             this.physics.add.collider(player, platforms);
             cursors = this.input.keyboard.createCursorKeys();
-            
+
             coins = this.physics.add.group({
                 key: "coin",
                 repeat: 5,
@@ -174,7 +203,7 @@
         function showChallenge() {
             isAnswering = true;
             document.getElementById("challenge-box").style.display = "block";
-            document.getElementById("challenge-text").innerText = "Solve: " + challenges[currentChallengeIndex].question;
+            document.getElementById("challenge-text").innerText = "Solve: " + challenges[Math.floor(Math.random() * challenges.length)].question;
             timerCountdown = 10;
             timer = setInterval(updateTimer, 1000);
         }
@@ -195,15 +224,4 @@
             let code = document.getElementById("codeInput").value;
             Sk.configure({ output: (text) => document.getElementById("output").innerText = text });
 
-            Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
-                .then(() => {
-                    document.getElementById("challenge-box").style.display = "none";
-                    clearInterval(timer);
-                    isAnswering = false;
-                    enemies.clear(true, true);
-                })
-                .catch(() => document.getElementById("output").innerText = "Try again!");
-        }
-    </script>
-</body>
-</html>
+            Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code,
