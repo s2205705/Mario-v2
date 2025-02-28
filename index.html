@@ -50,7 +50,7 @@
         <textarea id="codeInput" placeholder="Enter Python code here..."></textarea>
         <button onclick="checkAnswer()">Submit</button>
         <p id="output"></p>
-        <p id="timer">Time left: 10s</p>
+        <p id="timer">Time left: 20s</p>
     </div>
     <script>
         const config = {
@@ -82,7 +82,7 @@
         const game = new Phaser.Game(config);
 
         function preload() {
-            this.load.image("background", "https://i.imgur.com/4nK6HfB.png");
+            this.load.image("background", "https://th.bing.com/th/id/R.ad9e62546de9ff1192e8bdfa5a9628d3?rik=tTkFjdNCOHVBeA&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2fa%2f9%2f8%2f585854.jpg&ehk=0xdpNsz4QsxKl0si2GpYxsOCd2%2bQLDdqja0RxhgSEfI%3d&risl=&pid=ImgRaw&r=0");
             this.load.image("ground", "https://i.imgur.com/3pJrDyo.png");
             this.load.image("player", "https://i.imgur.com/O3Uvc5Q.png");
             this.load.image("coin", "https://i.imgur.com/H6EyNwC.png");
